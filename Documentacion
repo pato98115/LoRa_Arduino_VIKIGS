@@ -1,0 +1,145 @@
+Libreria LoRa.h:
+  Para usar esta se incluye tambien <SPI.h>
+aca ponemos solo las funciones que usamos de dicha libreria en nuestro proyecto, para mas
+informacion ver: https://github.com/sandeepmistry/arduino-LoRa/blob/master/API.md
+
+  *Begin
+    inicializa la libreria con una frecuencia especifica
+    
+    LoRa.begin(frecuencia);
+      frecuencia - frecuencia en Hz (433E6, 866E6, 915E6)
+      Devuelve 1 cuando tiene exito, 0 cuando falla.
+      
+  *Begin packet
+    comienza la secuencia para enviar un paquete
+
+    LoRa.beginPacket();
+      Devuelve 1 si el transmisor esta listo para enviar, 0 si esta ocupado o si ocurre una falla.
+
+  *Writing
+    escribe los datos en el paquete. cada paquete puede contener como maximo 255 bytes.
+  
+    LoRa.write(byte);
+    LoRa.write(buffer, length);
+      byte - byte unico para escribir en el paquete.
+      buffer - datos para escribir en el paquete.
+      length - tamaño de los datos a escribir.
+      Devuelve el numero de bytes escritos.
+
+      Nota: otras APIs tipo Print de Arduino pueden ser usadas para escribir los datos en el paquete 
+        ejemplo: LoRa.print(data);
+
+  *End packet
+    finaliza la secuencia del envio del paquete.
+
+    LoRa.endPacket();
+
+      Devuelve 1 cuando tiene exito, 0 cuando falla.
+      
+  *Parsing packet
+    verifica que el paquete ha sido recivido.
+
+    int tamañoDelPaquete = LoRa.parsePacket();
+
+      Devuelve el tamaño del paquete en bytes, 0 si no se ha recivido ningun paquete.
+
+  *Packet RSSI
+    int rssi = LoRa.packetRssi();
+      Devuelve el RSSI del paquete recivido.
+
+  *Packet SNR
+    float snr = LoRa.packetSnr();
+      Devuelve un valor estimado del SNR del paquete recivido en dB.
+
+  *Packet Frequency Error
+    long freqErr = LoRa.packetFrequencyError();
+      Devuelve el error de frecuencia en Hz. 
+        El error de frecuencia es la frecuencia de offset entre la frecuencia central del receiver y 
+        la de la señal de LoRa entrante. 
+
+  *Available
+    int availableBytes = LoRa.available()
+      Devuelve el numero de bytes disponibles para leer.
+      
+  *Read
+    Lee el byte siguiente del paquete.
+
+    byte b = LoRa.read();
+      Devuelve el byte siguiente del paquete o -1 si no hay bytes disponibles.
+      Nota: otras APIs tipo Stream de Arduino pueden ser usadas para leer los datos del paquete.
+
+  *Sleep mode
+    Pone al modulo en modo sleep.
+
+    LoRa.sleep();
+    
+  *TX Power
+    Cambia la Potencia TX de la radiofrecuencia.
+
+    LoRa.setTxPower(txPower);
+
+    LoRa.setTxPower(txPower, outputPin);
+    
+      txPower - Potencia TX en dB, default 17
+      outputPin - (opcional) PA output pin, soporta valores para PA_OUTPUT_RFO_PIN y para PA_OUTPUT_PA_BOOST_PIN, 
+      defaults en PA_OUTPUT_PA_BOOST_PIN.
+      Los valores que soporta son de 2 a 20 para PA_OUTPUT_PA_BOOST_PIN, y de 0 a 14 para PA_OUTPUT_RFO_PIN.
+      
+  *Spreading Factor
+    Cambia el spreading factor de la señal.
+
+    LoRa.setSpreadingFactor(spreadingFactor);
+      spreadingFactor - spreading factor, defaults en 7
+      Soporta valores entre 6 y 12. Si su valor es 6, se debe usar un modo de header implicito al transmitir y recibir paquetes.
+
+  *Signal Bandwidth
+    Cambia el ancho de banda de la señal.
+
+    LoRa.setSignalBandwidth(signalBandwidth);
+      signalBandwidth - Ancho de banda en Hz, defaults en 125E3.
+      Soporta los valores 7.8E3, 10.4E3, 15.6E3, 20.8E3, 31.25E3, 41.7E3, 62.5E3, 125E3, y 250E3.
+
+  *Coding Rate
+    Cambia la tasa de codificacion de errores de la señal.
+
+    LoRa.setCodingRate4(codingRateDenominator);
+      codingRateDenominator - denominador de la tasa de correcion de errores, defaults en 5.
+      Soporta valores entre 5 y 8. El numerador de la tasa de correcion de errores esta fijada en 4.
+      
+  *Sync Word
+    Cambia la palabra de sincronizacon.
+
+    LoRa.setSyncWord(syncWord);
+      syncWord - valor del byte usado como palabra de sincronizacion.
+      
+*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----
+
+Libreria LowPower.h:
+aca ponemos solo las funciones que usamos de dicha libreria en nuestro proyecto, para mas
+informacion ver: https://github.com/rocketscream/Low-Power
+
+  *Modo Sleep
+    Reduce el consumo del Arduino.
+    
+    LowPower.powerDown(sleep_time, ADC_OFF, BOD_OFF);
+    
+    sleep_time - tiempo de sueño, soporta los enumerados:
+            
+            SLEEP_15MS,   15 milisegundos
+            SLEEP_30MS,   30 milisegundos
+            SLEEP_60MS,   60 milisegundos
+            SLEEP_120MS,  120 milisegundos
+            SLEEP_250MS,  250 milisegundos
+            SLEEP_500MS,  500 milisegundos
+            SLEEP_1S,     1 segundo
+            SLEEP_2S,     2 segundos
+            SLEEP_4S,     4 segundos
+            SLEEP_8S,     8 segundos
+            SLEEP_FOREVER, tiempo indeterminado del cual se debe despertar mediante una interrupcion externa previamente definida
+            
+*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----*----
+
+Las funciones que usamos de la libreria estandar de Arduino y para que las usamos estan descriptas en el codigo.
+Para una completa documentacion de estas ver: https://www.arduino.cc/reference/en/
+
+  
