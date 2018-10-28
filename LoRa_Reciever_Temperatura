@@ -1,0 +1,58 @@
+#include <SPI.h>
+#include <LoRa.h>
+
+short int spread_factor = 9; //spread factor, desde 6 hasta 12
+
+byte sincWord = 0xFF; // Palabra de Sincronizacion, desde 0 hasta 0xFF
+
+short int codingRateDenominator = 4; //Denomidador de la Tasa de codificacion de errores, desde 4 hasta 8
+
+int signalBandwidth = 250E3; //Ancho de banda, soporta valores de: 7.8E3, 10.4E3, 15.6E3 20.8E3,
+                                              // 20.8E3, 31.25E3, 41.7E3, 62.5E3, 125E3 y 250E3
+
+void setup() {
+  
+  Serial.begin(9600);
+  while (!Serial);
+
+  Serial.println("LoRa Reciever");
+
+  //se inicializa la frecuencia de trabajo del modulo
+  if (!LoRa.begin(433E6)) { //modificar de acuerdo a la zona geografica
+    Serial.println("Starting LoRa failed!"); //si no se inicializa correctamente salta este mensjae
+    while (1);
+  }
+
+  LoRa.setSpreadingFactor(spread_factor);           //cambia el spread factor
+  LoRa.setSyncWord(sincWord);            //cambia la palabra de sincronizacion 
+  LoRa.setCodingRate4(codingRateDenominator);       //cambia el denominador de la tasa de codificacion de errores
+  LoRa.setSignalBandwidth(signalBandwidth);       //cambia el ancho de banda
+  
+  Serial.println("LoRa init succeeded.");
+  Serial.println("msjID   Temp(celcius)    RSSI    SNR   FreqError   ");
+}
+
+void loop() {
+  // analiza un paquete, y llama a onReceive con el resultado:
+  int packetSize = LoRa.parsePacket();
+  onReceive(packetSize);
+
+}
+
+void onReceive(int packetSize) { //funcion que procesa el paquete recibido
+  if (packetSize == 0) return;          // si no hay paquete sale de la funcion
+
+  String entrante = ""; //mensaje entrante
+
+  while (LoRa.available()) { // corre mientras haya bytes disponibles en el paquete
+    entrante += (char)LoRa.read(); //va completando el String un char a la vez
+  }
+
+    int RSSI_ = LoRa.packetRssi();//RSSI(indicador de fuerza de la señal recibida) del paquete
+
+    float SNR = LoRa.packetSnr();// SNR(relacion señal/ruido) del paquete
+    
+    long int FreqError = LoRa.packetFrequencyError();//Error de frecuencia del paquete
+
+  Serial.print("    "+entrante+"    "+RSSI_+"    "+SNR+"    "+FreqError+"    \n"); // manera comoda de imprimir los datos en el monitor serial
+}
