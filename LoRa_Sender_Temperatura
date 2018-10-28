@@ -1,0 +1,102 @@
+        /* Proyecto de Teoria de las Comunicaciones: LoRa Sender.
+         * UNC Argentina, Facultad de Ciencias Exactas, Fisicas y Naturales.
+         * Creadores: Agustinoy Jeremias, Orellano Mayco, 
+         *            Santana Ignacio y Viccini Patricio.
+         * Fecha:  27/10/2018
+         * Breve descripcion:
+         *    codigo para leer la temperatura desde un sensor  
+         *    y enviarla por radio frecuencia a traves de un transceiver 
+         *    usando el protocolo LoRa. Tambien se busca reducir el consumo 
+         *    del nodo asi como estudiar su rendimiento.
+         * Transceivier: XL1278.
+         * Sensor de Temperatura: LM35.
+         * Controlador: Arduino MEGA.
+         * **No se garantiza el funcionamiento de este codigo en implementaciones
+         * **circuitales distintas a la nuestra ni con otros componentes.
+         */
+
+#include <LowPower.h>
+#include <SPI.h>
+#include <LoRa.h>
+
+
+
+int LM35_PIN = 2; // Pin analógico asignado al Sensor de Temperatura LM35
+
+byte counter = 0; //contador de los paquetes enviados
+
+short int spread_factor = 9; //spread factor, desde 6 hasta 12
+
+byte sincWord = 0xFF; // Palabra de Sincronizacion, desde 0 hasta 0xFF
+
+short int codingRateDenominator = 4; //Denomidador de la Tasa de codificacion de errores, desde 4 hasta 8
+
+int signalBandwidth = 250E3; //Ancho de banda, soporta valores de: 7.8E3, 10.4E3, 15.6E3 20.8E3,
+                                              // 20.8E3, 31.25E3, 41.7E3, 62.5E3, 125E3 y 250E3
+
+int txPower = 11; //Factor de Potencia de la señal enviada en dB, desde 2 hasta 20
+
+void setup() {
+  
+  Serial.begin(9600);
+  while (!Serial);
+
+  Serial.println("LoRa Sender");
+
+  //se inicializa la frecuencia de trabajo del modulo
+  if (!LoRa.begin(433E6)) { //modificar de acuerdo a la zona geografica
+    Serial.println("Starting LoRa failed!"); //si no se inicializa correctamente salta este mensjae
+    while (1);
+  }
+
+  LoRa.setSpreadingFactor(spread_factor);           //cambia el spread factor
+  LoRa.setSyncWord(sincWord);            //cambia la palabra de sincronizacion 
+  LoRa.setCodingRate4(codingRateDenominator);       //cambia el denominador de la tasa de codificacion de errores
+  LoRa.setSignalBandwidth(signalBandwidth);       //cambia el ancho de banda
+  LoRa.setTxPower(txPower); //setea el Factor de Potencia
+  
+  LoRa.sleep();  //inicializa el modulo en MODO SLEEP(bajo consumo)
+  
+  Serial.println("LoRa init succeeded.");
+}
+
+void loop() {
+
+  //duerme al arduino 30seg
+  //-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -*
+  Serial.flush(); //libera la cola del puerto serial
+  for(int i = 0; i < 3; i++){ //ciclo donde se duerme 3 * 8seg = 24seg
+    LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
+  Serial.flush();  
+  } //luego de despertar libero la cola del puerto serial por las dudas
+  
+  LowPower.powerDown(SLEEP_4S, ADC_OFF, BOD_OFF); //duerme 4seg
+  Serial.flush(); 
+  
+  LowPower.powerDown(SLEEP_2S, ADC_OFF, BOD_OFF); //duerme 2seg
+  Serial.flush(); 
+  //-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -*
+  //despierta el arduino
+  
+  int input = analogRead(LM35_PIN);    // Obtengo el valor sensado por el LM35
+  float mv  = (5000 / 1024.0) * input; // Convierto el valor leido a mV
+  float temp = mv / 10;                 // Convierto los mV leidos a grados celsius
+  
+  
+  Serial.print("Sending packet: ");
+  Serial.println(counter);             //imprimo contador de paquetes
+  
+  String message = "VIKINGS "+(String)temp;   //defino el mensaje a enviar
+  sendMessage(message);   //llamo a la funcion que envia el mensaje (aca el modulo se "despierta" para enviar)
+  Serial.println("Sending " + message); //imprimo que mensaje estoy enviando
+  Serial.flush();
+  LoRa.sleep(); //vuelvo a poner a dormir al modulo 
+}
+
+void sendMessage(String saliente) //funcion que envia el mensaje 
+  {
+  LoRa.beginPacket();                   // creo un paquete
+  LoRa.print(saliente);                 // cargo el string al paquete
+  LoRa.endPacket();                     // cierro el paquete y lo envio
+  counter++;                           // incremento el contador de mensajes
+}
