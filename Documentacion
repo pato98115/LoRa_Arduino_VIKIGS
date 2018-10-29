@@ -1,5 +1,6 @@
+Libreria SPI.h:
+esta se pone para la comicacion entre el maestro(Controlador de Arduino) y el esclavo(XL1278)
 Libreria LoRa.h:
-  Para usar esta se incluye tambien <SPI.h>
 aca ponemos solo las funciones que usamos de dicha libreria en nuestro proyecto, para mas
 informacion ver: https://github.com/sandeepmistry/arduino-LoRa/blob/master/API.md
 
