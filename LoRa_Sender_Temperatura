@@ -19,8 +19,6 @@
 #include <SPI.h>
 #include <LoRa.h>
 
-
-
 int LM35_PIN = 2; // Pin analógico asignado al Sensor de Temperatura LM35
 
 byte counter = 0; //contador de los paquetes enviados
@@ -48,20 +46,17 @@ void setup() {
     Serial.println("Starting LoRa failed!"); //si no se inicializa correctamente salta este mensjae
     while (1);
   }
-
   LoRa.setSpreadingFactor(spread_factor);           //cambia el spread factor
   LoRa.setSyncWord(sincWord);            //cambia la palabra de sincronizacion 
   LoRa.setCodingRate4(codingRateDenominator);       //cambia el denominador de la tasa de codificacion de errores
   LoRa.setSignalBandwidth(signalBandwidth);       //cambia el ancho de banda
   LoRa.setTxPower(txPower); //setea el Factor de Potencia
-  
+
   LoRa.sleep();  //inicializa el modulo en MODO SLEEP(bajo consumo)
-  
   Serial.println("LoRa init succeeded.");
 }
 
 void loop() {
-
   //duerme al arduino 30seg
   //-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -*
   Serial.flush(); //libera la cola del puerto serial
@@ -69,10 +64,8 @@ void loop() {
     LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
   Serial.flush();  
   } //luego de despertar libero la cola del puerto serial por las dudas
-  
   LowPower.powerDown(SLEEP_4S, ADC_OFF, BOD_OFF); //duerme 4seg
   Serial.flush(); 
-  
   LowPower.powerDown(SLEEP_2S, ADC_OFF, BOD_OFF); //duerme 2seg
   Serial.flush(); 
   //-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -*
@@ -81,7 +74,6 @@ void loop() {
   int input = analogRead(LM35_PIN);    // Obtengo el valor sensado por el LM35
   float mv  = (5000 / 1024.0) * input; // Convierto el valor leido a mV
   float temp = mv / 10;                 // Convierto los mV leidos a grados celsius
-  
   
   Serial.print("Sending packet: ");
   Serial.println(counter);             //imprimo contador de paquetes
@@ -93,8 +85,7 @@ void loop() {
   LoRa.sleep(); //vuelvo a poner a dormir al modulo 
 }
 
-void sendMessage(String saliente) //funcion que envia el mensaje 
-  {
+void sendMessage(String saliente) //funcion que envia el mensaje {
   LoRa.beginPacket();                   // creo un paquete
   LoRa.print(saliente);                 // cargo el string al paquete
   LoRa.endPacket();                     // cierro el paquete y lo envio
