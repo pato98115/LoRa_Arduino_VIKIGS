@@ -1,3 +1,8 @@
+/*Receptor LoRa
+*Creado para testear el Emisor LoRa descripto en el otro archivo
+**mismos componentes, ver especificaciones del Emisor**
+*/
+
 #include <SPI.h>
 #include <LoRa.h>
 
