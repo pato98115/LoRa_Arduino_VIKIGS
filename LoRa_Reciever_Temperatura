@@ -61,3 +61,4 @@ void onReceive(int packetSize) { //funcion que procesa el paquete recibido
 
   Serial.print("    "+entrante+"    "+RSSI_+"    "+SNR+"    "+FreqError+"    \n"); // manera comoda de imprimir los datos en el monitor serial
 }
+ 
